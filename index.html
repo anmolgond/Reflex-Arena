@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reflex Arena - Developed by Anmol</title>
+    <style>
+        :root {
+            --bg: #050508;
+            --accent: #00f3ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #39ff14;
+            --neon-red: #ff3131;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        [data-theme="red"] { --accent: #ff3131; }
+        [data-theme="purple"] { --accent: #bf00ff; }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; padding: 0; 
+            font-family: 'Segoe UI', 'Roboto', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; 
+        }
+        
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex; 
+            align-items: center; justify-content: center;
+        }
+
+        #app { width: 100%; height: 100%; position: relative; overflow: hidden; }
+
+        .screen { 
+            position: absolute; inset: 0; 
+            display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; 
+            padding: 20px; text-align: center;
+            transition: 0.3s ease;
+            z-index: 5;
+        }
+
+        .hidden { opacity: 0; pointer-events: none; transform: scale(1.1); }
+
+        .title { 
+            font-size: 3rem; 
+            margin-bottom: 20px; 
+            text-shadow: 0 0 20px var(--accent); 
+            letter-spacing: 2px; 
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        /* Nickname Input */
+        .name-input {
+            background: var(--glass);
+            border: 2px solid var(--accent);
+            padding: 12px;
+            border-radius: 12px;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+            width: 80%;
+            max-width: 250px;
+            outline: none;
+            font-weight: bold;
+        }
+
+        .theme-picker { display: flex; gap: 15px; margin-bottom: 30px; }
+        .t-dot { 
+            width: 30px; height: 30px; border-radius: 50%; 
+            cursor: pointer; border: 2px solid #fff; 
+        }
+
+        .btn-group { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 320px; }
+        .btn { 
+            background: var(--glass); 
+            border: 2px solid var(--accent); 
+            color: #fff; 
+            padding: 18px; 
+            font-size: 1rem; 
+            border-radius: 18px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            transition: 0.2s;
+        }
+        .btn:active { transform: scale(0.95); background: var(--accent); color: #000; }
+
+        .bg-wait { background: var(--neon-red) !important; }
+        .bg-go { background: var(--neon-green) !important; color: #000 !important; }
+        
+        .glitch-active { animation: glitch 0.15s infinite; }
+        @keyframes glitch {
+            0% { transform: translate(4px, 4px); }
+            50% { transform: translate(-4px, -4px); }
+            100% { transform: translate(0); }
+        }
+
+        .icon-circle {
+            width: 120px; height: 120px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 4rem; margin-bottom: 25px;
+            border: 5px solid var(--accent); 
+            box-shadow: 0 0 30px var(--accent);
+        }
+
+        /* Result Styles */
+        .result-card {
+            background: rgba(10, 10, 15, 0.98); 
+            padding: 30px 20px; border-radius: 30px;
+            border: 2px solid var(--accent); 
+            width: 95%; max-width: 400px;
+        }
+
+        .badge-tag {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .badge-god { background: gold; color: black; box-shadow: 0 0 15px gold; }
+        .badge-cyborg { background: var(--accent); color: black; }
+        .badge-human { background: #fff; color: black; }
+        .badge-snail { background: #555; color: white; }
+
+        .time-sec { font-size: 3.5rem; font-weight: 900; color: var(--accent); }
+
+        .insta-btn {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            color: #fff; text-decoration: none; padding: 15px; 
+            border-radius: 15px; margin-top: 20px; font-weight: bold; font-size: 0.9rem;
+        }
+
+        .share-btn { 
+            background: #444 !important; border: none !important; 
+            color: white !important; margin-top: 10px; width: 100%;
+        }
+
+        .footer-container {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 25px;
+            opacity: 0.6;
+            font-size: 0.75rem;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        #dummy-copy { position: fixed; top: -1000px; left: -1000px; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <textarea id="dummy-copy"></textarea>
+
+    <!-- Home Screen -->
+    <div id="home" class="screen">
+        <h1 class="title">REFLEX ARENA</h1>
+        
+        <input type="text" id="player-name" class="name-input" placeholder="Enter Nickname..." maxlength="12">
+
+        <div class="theme-picker">
+            <div class="t-dot" style="background:#00f3ff" onclick="setTheme('blue')"></div>
+            <div class="t-dot" style="background:#ff3131" onclick="setTheme('red')"></div>
+            <div class="t-dot" style="background:#bf00ff" onclick="setTheme('purple')"></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" onclick="startGame('normal')">NORMAL MODE</button>
+            <button class="btn" onclick="startGame('pro')" style="color:var(--neon-pink); border-color:var(--neon-pink)">PRO MODE</button>
+            <button class="btn" onclick="startGame('legend')" style="background:var(--neon-red); border:none">LEGEND MODE</button>
+        </div>
+
+        <div class="footer-container">
+            <div>DEVELOPED BY ANMOL</div>
+            <div>CAN YOU BEAT WORLD RECORD 100MS?</div>
+        </div>
+    </div>
+
+    <!-- Gameplay Area -->
+    <div id="game" class="screen hidden" onmousedown="handleAction(event)" ontouchstart="handleAction(event)">
+        <div id="g-circle" class="icon-circle">👆</div>
+        <h2 id="g-msg" style="font-size: 2.2rem; font-weight: 900;">READY?</h2>
+        <p id="g-sub" style="margin-top:15px;"></p>
+    </div>
+
+    <!-- Result Area -->
+    <div id="result" class="screen hidden" style="background:rgba(0,0,0,0.95); z-index: 20;">
+        <div class="result-card">
+            <div id="res-nickname" style="font-weight: bold; color: var(--accent); margin-bottom: 5px;">GUEST</div>
+            <div id="res-badge" class="badge-tag">HUMAN</div>
+            <div id="res-sec" class="time-sec">0.000s</div>
+            <p id="res-ms" style="color:#888; font-weight:bold; margin-bottom:15px;">(0ms)</p>
+            
+            <a href="https://www.instagram.com/anmol.gond.351" target="_blank" class="insta-btn">
+                Follow @anmol.gond.351
+            </a>
+
+            <button id="share-text-btn" class="btn share-btn" onclick="copyEnhancedScore()">SHARE TO FRIEND 👤</button>
+            
+            <div class="btn-group" style="margin-top:20px; max-width:none">
+                <button class="btn" style="background: var(--accent); color: #000; border: none;" onclick="resetGame()">TRY AGAIN</button>
+                <button class="btn" style="border-color: #444" onclick="location.reload()">MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentMode, state = 'idle', startTime, timer, combo = 0;
+    let isInverted = false;
+    let playerName = "Guest";
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function beep(f, t, d, v=0.1) {
+        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+        o.type = t; o.frequency.value = f; g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + d);
+    }
+
+    function setTheme(t) { document.documentElement.setAttribute('data-theme', t); }
+
+    function startGame(m) {
+        const nameInput = document.getElementById('player-name').value.trim();
+        playerName = nameInput || "Guest";
+        currentMode = m;
+        document.getElementById('home').classList.add('hidden');
+        document.getElementById('game').classList.remove('hidden');
+        resetGame();
+    }
+
+    function resetGame() {
+        state = 'idle'; clearTimeout(timer);
+        document.getElementById('result').classList.add('hidden');
+        document.getElementById('share-text-btn').innerText = "SHARE TO FRIEND 👤";
+        const g = document.getElementById('game');
+        g.className = 'screen';
+        isInverted = false;
+
+        if (currentMode === 'normal') {
+            ui("👆", "CLICK TO START", "Testing your basics.");
+        } else {
+            g.classList.add('bg-wait');
+            ui("🛑", "WAIT...", "Concentrate!");
+            state = 'waiting';
+            
+            const delay = Math.random() * 3000 + 2000;
+
+            if (currentMode === 'legend') {
+                setTimeout(() => {
+                    if(state === 'waiting') {
+                        g.classList.add('glitch-active');
+                        beep(100, 'sawtooth', 0.2, 0.2);
+                        setTimeout(() => g.classList.remove('glitch-active'), 400);
+                    }
+                }, delay * 0.5);
+            }
+
+            timer = setTimeout(() => {
+                state = 'go';
+                startTime = Date.now();
+                g.className = 'screen bg-go';
+                beep(800, 'square', 0.15);
+                
+                if (currentMode === 'legend' && Math.random() > 0.5) {
+                    isInverted = true;
+                    ui("🙃", "INVERTED!", "CLICK TOP HALF!");
+                } else {
+                    ui("⚡", "TAP!", "QUICK!");
+                }
+            }, delay);
+        }
+    }
+
+    function handleAction(e) {
+        if(e) e.preventDefault();
+        const touchY = (e.touches ? e.touches[0].clientY : e.clientY);
+        const winH = window.innerHeight;
+
+        if (state === 'idle' && currentMode === 'normal') {
+            state = 'go'; startTime = Date.now(); beep(400, 'sine', 0.1);
+            ui("⏱️", "STOP!", "Click now!");
+        } else if (state === 'go') {
+            if (isInverted && touchY > winH / 2) {
+                fail("WRONG SIDE!"); return;
+            }
+            const diff = Date.now() - startTime;
+            finish(diff);
+        } else if (state === 'waiting') {
+            fail("TOO EARLY!");
+        }
+    }
+
+    function fail(msg) {
+        state = 'finished'; clearTimeout(timer); beep(150, 'sawtooth', 0.5);
+        showResult(null, msg);
+    }
+
+    function finish(ms) {
+        state = 'finished'; beep(600, 'sine', 0.1);
+        showResult(ms);
+    }
+
+    function ui(i, m, s) {
+        document.getElementById('g-circle').innerText = i;
+        document.getElementById('g-msg').innerText = m;
+        document.getElementById('g-sub').innerText = s;
+    }
+
+    function showResult(ms, err) {
+        document.getElementById('result').classList.remove('hidden');
+        const sD = document.getElementById('res-sec'), mD = document.getElementById('res-ms'), 
+              nD = document.getElementById('res-nickname'), bD = document.getElementById('res-badge');
+        
+        nD.innerText = playerName.toUpperCase();
+
+        if (err) {
+            sD.innerText = "OUT"; sD.style.color = "var(--neon-red)"; mD.innerText = err;
+            bD.style.display = "none";
+        } else {
+            sD.innerText = (ms/1000).toFixed(3) + "s"; sD.style.color = "var(--accent)"; mD.innerText = `(${ms}ms)`;
+            bD.style.display = "inline-block";
+            
+            // Badge Logic
+            if(ms < 150) { bD.innerText = "GOD SPEED ⚡"; bD.className = "badge-tag badge-god"; }
+            else if(ms < 250) { bD.innerText = "CYBORG 🤖"; bD.className = "badge-tag badge-cyborg"; }
+            else if(ms < 400) { bD.innerText = "HUMAN 👨‍💻"; bD.className = "badge-tag badge-human"; }
+            else { bD.innerText = "SNAIL 🐌"; bD.className = "badge-tag badge-snail"; }
+        }
+    }
+
+    function copyEnhancedScore() {
+        const time = document.getElementById('res-sec').innerText;
+        // User requested format: I got (score) in reflex arena. You should also try it
+        const msg = `I got ${time} (${document.getElementById('res-ms').innerText}) in reflex arena. You should also try it. Follow @anmol.gond.351`;
+        
+        const dummy = document.getElementById('dummy-copy');
+        dummy.value = msg;
+        dummy.select();
+        dummy.setSelectionRange(0, 99999);
+
+        try {
+            document.execCommand('copy');
+            document.getElementById('share-text-btn').innerText = "COPIED! ✅";
+        } catch (err) {
+            console.error('Copy failed');
+        }
+    }
+</script>
+</body>
+</html>
